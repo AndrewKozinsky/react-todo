@@ -13,6 +13,7 @@ export default class App extends Component {
     maxId = 100;
 
     state = {
+        searchText: '',
         todoData: [
             this.createTodoItem('Drink Tea'),
             this.createTodoItem('Build React App'),
@@ -86,9 +87,25 @@ export default class App extends Component {
         this.toggleProperty(id, 'done');
     };
 
-    render() {
+    setSearchText = text => {
+        this.setState({
+            searchText: text
+        })
+    };
 
+    filterTasksBySearchWord = (elem) => {
+        const searchText = this.state.searchText.toLowerCase();
+
+        if(searchText === '') return true;
+        return elem.label.toLowerCase().indexOf(searchText) > -1
+    };
+
+    render() {
         const {todoData} = this.state;
+
+        let filteredTasks = todoData
+            .filter(this.filterTasksBySearchWord);
+
         const doneCount = todoData.filter(el => el.done).length;
         const todoCount = todoData.length - doneCount;
 
@@ -96,12 +113,12 @@ export default class App extends Component {
             <div className="todo-app">
                 <AppHeader toDo={todoCount} done={doneCount} />
                 <div className="top-panel d-flex">
-                    <SearchPanel />
+                    <SearchPanel onSetSearchText={this.setSearchText} />
                     <ItemStatusFilter />
                 </div>
 
                 <TodoList
-                    todos = {todoData}
+                    todos = {filteredTasks}
                     onDeleted={this.deleteItem}
                     onToggleImportant={this.onToggleImportant}
                     onToggleDone={this.onToggleDone}
