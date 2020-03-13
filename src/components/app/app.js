@@ -14,6 +14,7 @@ export default class App extends Component {
 
     state = {
         searchText: '',
+        filteredBtn: 'All', // All, Active, Done
         todoData: [
             this.createTodoItem('Drink Tea'),
             this.createTodoItem('Build React App'),
@@ -93,6 +94,12 @@ export default class App extends Component {
         })
     };
 
+    setFilteredBtn = btnName => {
+        this.setState({
+            filteredBtn: btnName
+        })
+    };
+
     filterTasksBySearchWord = (elem) => {
         const searchText = this.state.searchText.toLowerCase();
 
@@ -100,21 +107,33 @@ export default class App extends Component {
         return elem.label.toLowerCase().indexOf(searchText) > -1
     };
 
+    filterTasksByFilteredBtn = (elem) => {
+        const btnName = this.state.filteredBtn;
+
+        if(btnName === 'All') return true;
+        if(btnName === 'Active') return !elem.done
+        if(btnName === 'Done') return elem.done
+    };
+
     render() {
-        const {todoData} = this.state;
+        const {todoData, filteredBtn} = this.state;
 
         let filteredTasks = todoData
-            .filter(this.filterTasksBySearchWord);
+            .filter(this.filterTasksBySearchWord)
+            .filter(this.filterTasksByFilteredBtn);
+
 
         const doneCount = todoData.filter(el => el.done).length;
         const todoCount = todoData.length - doneCount;
 
         return (
             <div className="todo-app">
-                <AppHeader toDo={todoCount} done={doneCount} />
+                <AppHeader
+                    toDo={todoCount}
+                    done={doneCount} />
                 <div className="top-panel d-flex">
                     <SearchPanel onSetSearchText={this.setSearchText} />
-                    <ItemStatusFilter />
+                    <ItemStatusFilter btnName={filteredBtn} onSetFilteredBtn={this.setFilteredBtn} />
                 </div>
 
                 <TodoList
